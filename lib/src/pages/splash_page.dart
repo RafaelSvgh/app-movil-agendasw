@@ -36,7 +36,7 @@ class SplashPageState extends ConsumerState<SplashPage> {
     });
     if (existenPrefs) {
       User user =
-          User(sessionId: session, uid: uid, name: name!, username: username!);
+          User(sessionId: session, uid: uid, name: name, username: username);
       ref.read(userProvider.notifier).update((value) => user);
     }
   }
