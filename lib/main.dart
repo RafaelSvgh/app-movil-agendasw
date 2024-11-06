@@ -1,8 +1,11 @@
+import 'package:app_movil/src/pages/home_page.dart';
+import 'package:app_movil/src/pages/login_page.dart';
 import 'package:app_movil/src/pages/splash_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -18,9 +21,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      initialRoute: 'home',
+      initialRoute: 'splash',
       routes: {
-        'home': (BuildContext context) => const SplashPage(),
+        'splash': (BuildContext context) => const SplashPage(),
+        'login': (BuildContext context) => const LoginPage(),
+        'home': (BuildContext context) => const HomePage(),
       },
     );
   }
