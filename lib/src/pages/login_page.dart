@@ -1,5 +1,6 @@
 import 'package:app_movil/src/models/user.dart';
-import 'package:app_movil/src/pages/home_page.dart';
+import 'package:app_movil/src/pages/estudiante/inicio_page.dart';
+import 'package:app_movil/src/pages/tutor/inicio_page.dart';
 import 'package:app_movil/src/services/auth_services.dart';
 import 'package:app_movil/src/services/user_provider.dart';
 import 'package:app_movil/src/widgets/login_form.dart';
@@ -223,29 +224,42 @@ class LoginPageState extends ConsumerState<LoginPage> {
       _prefs!.setInt('uid', response['uid']);
       _prefs!.setString('username', response['username']);
       _prefs!.setString('name', response['name']);
+      _prefs!.setString('rol', response['role']);
+      _prefs!.setInt('edad', response['edad']);
       User user = User.fromJson(response);
       ref.read(userProvider.notifier).update((state) => user);
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomePage()),
+        await Future.delayed(const Duration(milliseconds: 1700));
+        setState(() {
+          _isLoading = false;
+        });
+        if (response['role'] == 'estudiante') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const InicioPageEst()),
+          );
+          return;
+        }
+        if (response['role'] == 'tutor') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const InicioPageTut()),
+          );
+          return;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ingrese desde el sistema web')),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _errorMessage = 'Error de autenticación. Verifica tus credenciales.';
+          _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(_errorMessage!)),
         );
-      }
-    } finally {
-      await Future.delayed(const Duration(seconds: 2));
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }

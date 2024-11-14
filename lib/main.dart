@@ -1,10 +1,14 @@
-import 'package:app_movil/src/pages/home_page.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:app_movil/src/pages/estudiante/inicio_page.dart';
+import 'package:app_movil/src/pages/estudiante/perfil_page.dart';
+import 'package:app_movil/src/pages/estudiante/publicacion_page.dart';
 import 'package:app_movil/src/pages/login_page.dart';
 import 'package:app_movil/src/pages/splash_page.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: ".env");
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -18,14 +22,16 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Agenda Electrónica',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade700),
         useMaterial3: true,
       ),
       initialRoute: 'splash',
       routes: {
         'splash': (BuildContext context) => const SplashPage(),
         'login': (BuildContext context) => const LoginPage(),
-        'home': (BuildContext context) => const HomePage(),
+        'inicio': (BuildContext context) => const InicioPageEst(),
+        'perfil': (BuildContext context) => const PerfilPageEst(),
+        'publicacion': (BuildContext context) => const PublicacionPage(),
       },
     );
   }

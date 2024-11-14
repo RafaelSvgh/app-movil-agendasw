@@ -43,6 +43,11 @@ dependencies:
   dio: ^5.7.0
   shared_preferences: ^2.3.2
   flutter_spinkit: ^5.2.1
+  curved_navigation_bar: ^1.0.6
+  url_launcher: ^6.3.1
+  http: ^1.2.2
+  image_picker: ^1.1.2
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -68,9 +73,12 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - .env
     - assets/images/img1.json
     - assets/images/img2.json
     - assets/images/img3.json
+    - assets/images/ia.json
+    - assets/images/game.json
     - assets/images/escuela.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
