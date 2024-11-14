@@ -1,13 +1,15 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
   final Dio _dio = Dio();
 
-  final String _baseUrl = 'http://10.0.2.2:8069/api';
+  final String? _baseUrl = dotenv.env['HOST']; //'http://10.0.2.2:8069/api';
 
   Future<Map<String, dynamic>> login(
       {required String email, required String password}) async {
     try {
+      print(_baseUrl);
       final response = await _dio.post(
         '$_baseUrl/login',
         data: {
