@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:app_movil/src/models/publicacion.dart';
 import 'package:app_movil/src/services/ia_services.dart';
+import 'package:app_movil/src/services/user_provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -23,7 +24,9 @@ class PublicacionPageState extends ConsumerState<PublicacionPage> {
   File? _image;
   String? path = dotenv.env['HOST'];
   String resultadoIA = '';
+  String analisis = 'xqxq';
   bool isLoading = false;
+  bool _isLoading = false;
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -48,7 +51,7 @@ class PublicacionPageState extends ConsumerState<PublicacionPage> {
         const TextStyle(fontSize: 19, fontWeight: FontWeight.w600);
 
     TextStyle estiloTexto = const TextStyle(fontSize: 17);
-
+    final user = ref.watch(userProvider);
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
@@ -62,43 +65,91 @@ class PublicacionPageState extends ConsumerState<PublicacionPage> {
         ),
         centerTitle: true,
         actions: [
-          IconButton(
-              onPressed: () async {
-                await _pickImage();
-                print(_image?.parent ?? 'No hay');
-              },
-              icon: const Icon(
-                Icons.add_photo_alternate,
-                size: 35,
-              ))
+          user.role == 'estudiante'
+              ? IconButton(
+                  onPressed: () async {
+                    setState(() {
+                      _isLoading = true;
+                    });
+                    await _pickImage();
+                    final res = await obtenerAnalisisDeImagen(
+                        _image!, pub.titulo!, pub.detalle!);
+                    setState(() {
+                      analisis = res;
+                      _isLoading = false;
+                    });
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Evaluación de tarea'),
+                          content: _image != null
+                              ? Column(
+                                  children: [
+                                    Image.file(
+                                      _image!,
+                                      width: 300,
+                                      height: 300,
+                                      fit: BoxFit.cover,
+                                    ),
+                                    Container(
+                                        padding: const EdgeInsets.only(
+                                            top: 10, bottom: 10),
+                                        child: Text(analisis))
+                                  ],
+                                )
+                              : const Text('Error en análisis'),
+                          actions: [
+                            TextButton(
+                              onPressed: () async {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text("Cerrar"),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  icon: _isLoading
+                      ? const SpinKitFadingCircle(
+                          color: Colors.white,
+                        )
+                      : const Icon(
+                          Icons.add_photo_alternate,
+                          size: 35,
+                        ))
+              : const Icon(Icons.check_circle_outline)
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          setState(() {
-            isLoading = true; // Activa el loading al hacer la solicitud
-          });
-          try {
-            final sugerencias =
-                await obtenerSugerencias(pub.titulo!, pub.detalle!);
-            setState(() {
-              resultadoIA = sugerencias;
-            });
-          } catch (e) {
-            print(e);
-          } finally {
-            setState(() {
-              isLoading =
-                  false; // Desactiva el loading cuando la respuesta llega
-            });
-          }
-        },
-        child: isLoading
-            ? SpinKitFadingCircle(
-                color: Colors.grey.shade700,
-              )
-            : LottieBuilder.asset('assets/images/ia.json'),
-      ),
+      floatingActionButton: user.role == 'estudiante'
+          ? FloatingActionButton(
+              onPressed: () async {
+                setState(() {
+                  isLoading = true; // Activa el loading al hacer la solicitud
+                });
+                try {
+                  final sugerencias =
+                      await obtenerSugerencias(pub.titulo!, pub.detalle!);
+                  setState(() {
+                    resultadoIA = sugerencias;
+                  });
+                } catch (e) {
+                  print(e);
+                } finally {
+                  setState(() {
+                    isLoading =
+                        false; // Desactiva el loading cuando la respuesta llega
+                  });
+                }
+              },
+              child: isLoading
+                  ? SpinKitFadingCircle(
+                      color: Colors.grey.shade700,
+                    )
+                  : LottieBuilder.asset('assets/images/ia.json'),
+            )
+          : null,
       body: Container(
         width: double.infinity,
         height: double.infinity,

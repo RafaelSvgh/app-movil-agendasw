@@ -2,49 +2,63 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-Future<String> editarImagenDesdeUrl(String imageUrl, String prompt) async {
-  final url = Uri.parse('https://api.openai.com/v1/images/edits');
-  
+import 'dart:io';
+
+Future<String> obtenerAnalisisDeImagen(
+    File imageFile, String titulo, String detalle) async {
+  final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+  String? key = dotenv.env['KEY_OPENAI'];
+  String? org = dotenv.env['ORG_OPENAI'];
+
   try {
-    // Descargamos la imagen desde la URL
-    final response = await http.get(Uri.parse(imageUrl));
+    // Codificar la imagen a base64
+    final bytes = await imageFile.readAsBytes();
+    final base64Image = base64Encode(bytes);
 
+    // Crear el cuerpo de la solicitud
+    final body = jsonEncode({
+      "model": "gpt-4o-mini", // Modelo adecuado (ajusta según tu necesidad)
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text":
+                  "Quiero saber si esta imagen cumple en algunos aspectos con esta tarea, titulo: $titulo , detalle: $detalle, evalua la tarea en la escala del 0 al 100, no me ocupes mas de 500 caracteres",
+            },
+            {
+              "type": "image_url",
+              "image_url": {"url": "data:image/jpeg;base64,$base64Image"},
+            },
+          ],
+        }
+      ],
+      "max_tokens": 300,
+    });
+
+    // Enviar la solicitud HTTP POST
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $key',
+        'OpenAI-Organization': org ?? '',
+      },
+      body: body,
+    );
+
+    // Verificar la respuesta de la API
     if (response.statusCode == 200) {
-      // Convertimos la imagen descargada en bytes
-      final bytes = response.bodyBytes;
-
-      // Convertimos los bytes a Base64
-      final base64Image = base64Encode(bytes);
-
-      // Enviamos la imagen en Base64 al API de OpenAI
-      final apiResponse = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization':
-              'Bearer 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', // Reemplaza con tu clave de proyecto
-          'OpenAI-Organization': 'org-P7KK6seWPlyC6cYjzkgtXBHV'
-        },
-        body: jsonEncode({
-          "model": "image-alpha-001",
-          "image": base64Image,
-          "prompt": prompt,
-          "num_images": 1,
-          "size": "512x512",
-        }),
-      );
-
-      if (apiResponse.statusCode == 200) {
-        final data = jsonDecode(apiResponse.body);
-        return data['data'][0]['url']; // URL de la imagen editada
-      } else {
-        throw Exception('Error en la solicitud de edición de imagen');
-      }
+      final responseData =
+          utf8.decode(response.bodyBytes); // Decodificar correctamente en UTF-8
+      final data = jsonDecode(responseData); // Decodificar la respuesta en JSON
+      return data['choices'][0]['message']['content'].trim();
     } else {
-      throw Exception('Error al descargar la imagen');
+      throw Exception('Error de API al analizar la imagen: ${response.body}');
     }
   } catch (e) {
-    throw Exception('Error de red o API');
+    throw Exception('Error de red o API: $e');
   }
 }
 

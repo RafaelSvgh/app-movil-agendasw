@@ -25,6 +25,23 @@ class CursoServices {
       throw Exception('Error en la solicitud');
     }
   }
+
+  Future<Map<String, dynamic>> cursosId({required int id}) async {
+    final url = Uri.parse('$baseUrl/cursos/$id');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['curso']; // Retornamos la lista de cursos
+      } else {
+        throw Exception('Error al obtener los cursos');
+      }
+    } catch (e) {
+      throw Exception('Error en la solicitud');
+    }
+  }
 }
 
 final cursoProvider = StateProvider<Curso>((ref) {

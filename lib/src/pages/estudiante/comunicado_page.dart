@@ -29,8 +29,8 @@ class ComunicadoPageEstState extends ConsumerState<ComunicadoPageEst> {
     final response = await pubs.publicaciones();
     final user = ref.watch(userProvider);
     final est = await estudianteServices.estudiante(userId: user.uid);
-    final response2 = await cursoServices.cursos();
     Estudiante estudiante = Estudiante.fromJson(est);
+    final response2 = await cursoServices.cursos();
     Cursos cursos = Cursos.fromJson(response2);
     Curso? curso = cursos.findCursoByEstudianteId(estudiante.id);
     Publicaciones publicaciones = Publicaciones.fromJson(response);

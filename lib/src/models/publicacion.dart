@@ -175,7 +175,8 @@ List<Publicacion> filtrarPublicacionesPorTipos(
     List<String> tiposPublicacion) {
   return publicaciones.where((publicacion) {
     // Verificar si el tipo de publicación coincide con alguno de los tipos en la lista
-    bool esTipoCorrecto = tiposPublicacion.contains(publicacion.tipopublicacion);
+    bool esTipoCorrecto =
+        tiposPublicacion.contains(publicacion.tipopublicacion);
 
     // Verificar si el grupo coincide
     bool perteneceAGrupo = publicacion.grupos!.contains(grupoUsuario);
@@ -193,3 +194,25 @@ List<Publicacion> filtrarPublicacionesPorTipos(
   }).toList();
 }
 
+List<Publicacion> filtrarPublicaciones(
+  List<Publicacion> publicaciones,
+  String nombreUsuario,
+  String grupoUsuario,
+  List<int> cursosUsuario,
+  List<String> tiposPublicacion,
+) {
+  return publicaciones.where((publicacion) {
+    // Verificar si el grupo coincide
+    bool perteneceAGrupo = publicacion.grupos!.contains(grupoUsuario);
+
+    // Verificar si está en destinatarios
+    bool esDestinatario = publicacion.destinatarios!.contains(nombreUsuario);
+
+    // Verificar si el curso de la publicación está en la lista de cursos del tutor o hijo
+    bool perteneceACurso =
+        publicacion.curso != null && cursosUsuario.contains(publicacion.curso);
+
+    // Incluir la publicación si cumple todas las condiciones
+    return (perteneceAGrupo || esDestinatario || perteneceACurso);
+  }).toList();
+}

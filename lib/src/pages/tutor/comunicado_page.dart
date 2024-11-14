@@ -1,5 +1,9 @@
+import 'package:app_movil/src/models/curso.dart';
 import 'package:app_movil/src/models/publicacion.dart';
+import 'package:app_movil/src/models/tutor.dart';
+import 'package:app_movil/src/services/curso_services.dart';
 import 'package:app_movil/src/services/publicacion_services.dart';
+import 'package:app_movil/src/services/tutor_services.dart';
 import 'package:app_movil/src/services/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +17,7 @@ class ComunicadoPageTut extends ConsumerStatefulWidget {
 
 class ComunicadoPageTutState extends ConsumerState<ComunicadoPageTut> {
   PublicacionService pubs = PublicacionService();
+  CursoServices cursoServices = CursoServices();
   @override
   void initState() {
     getPubs();
@@ -22,9 +27,25 @@ class ComunicadoPageTutState extends ConsumerState<ComunicadoPageTut> {
   Future<void> getPubs() async {
     final response = await pubs.publicaciones();
     final user = ref.watch(userProvider);
+    final response2 = await cursoServices.cursos();
+    Cursos cursos = Cursos.fromJson(response2);
     Publicaciones publicaciones = Publicaciones.fromJson(response);
-    List<Publicacion> pub = filtrarPublicacionesPorTipos(publicaciones.datos!,
-        user.name, 'Tutores', 10000, ['Comunicado', 'Actividad']);
+    List<Estudiante>? estudiantes = ref.watch(tutorProvider).estudiantes;
+    List<int> cursosDeHijos = [];
+    for (var estudiante in estudiantes!) {
+      // Busca el curso para cada estudiante
+      var curso = cursos.findCursoByEstudianteId(estudiante.id!);
+      if (curso != null) {
+        cursosDeHijos.add(curso.id!);
+      }
+    }
+    List<Publicacion> pub = filtrarPublicaciones(
+      publicaciones.datos!,
+      user.name,
+      'Tutores',
+      cursosDeHijos,
+      ['Comunicado', 'Actividad'],
+    );
     ref.read(publicacionProvider.notifier).update((value) => pub);
   }
 

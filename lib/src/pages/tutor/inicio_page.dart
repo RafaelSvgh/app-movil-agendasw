@@ -18,8 +18,6 @@ class InicioPageTut extends ConsumerStatefulWidget {
 }
 
 class InicioPageTutState extends ConsumerState<InicioPageTut> {
-  final GlobalKey<EstudiantePageState> _estPageKey =
-      GlobalKey<EstudiantePageState>();
   final GlobalKey<ComunicadoPageTutState> _comunicadoPageKey =
       GlobalKey<ComunicadoPageTutState>();
   final GlobalKey<PerfilPageTutState> _perfilPageKey =
@@ -34,18 +32,16 @@ class InicioPageTutState extends ConsumerState<InicioPageTut> {
       Icons.campaign,
       size: 30,
     ),
-    Icon(Icons.school, size: 30),
     Icon(CupertinoIcons.person_fill, size: 30),
   ];
   late List<Widget> pages;
-  static const titulos = ['COMUNICADOS', 'ESTUDIANTES', 'PERFIL'];
+  static const titulos = ['COMUNICADOS', 'PERFIL'];
   @override
   void initState() {
     cargarPrefs();
     super.initState();
     pages = [
       ComunicadoPageTut(key: _comunicadoPageKey),
-      EstudiantePage(key: _estPageKey),
       PerfilPageTut(
         key: _perfilPageKey,
       ),
@@ -110,10 +106,6 @@ class InicioPageTutState extends ConsumerState<InicioPageTut> {
         await _comunicadoPageKey.currentState?.refrescarPagina();
         break;
       case 1:
-        await Future.delayed(const Duration(milliseconds: 1800));
-        await _estPageKey.currentState?.refrescarPagina();
-        break;
-      case 3:
         await Future.delayed(const Duration(milliseconds: 1800));
         await _perfilPageKey.currentState?.refrescarPagina();
         break;
